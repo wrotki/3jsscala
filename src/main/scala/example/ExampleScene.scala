@@ -1,5 +1,6 @@
 package example
 
+import objects3d.Actors
 import org.denigma.threejs.extensions.controls.{JumpCameraControls, CameraControls}
 import org.denigma.threejs.extras.HtmlSprite
 import org.denigma.threejs._
@@ -13,54 +14,22 @@ import scalatags.JsDom.all._
 
 // scalastyle:off
 class ExampleScene(val container: HTMLElement, val width: Double, val height: Double) extends Container3D {
-  val geometry = new BoxGeometry(350, 300, 250)
 
-  val colors = List("green", "red", "blue", "orange", "purple", "teal")
-  val colorMap = Map(colors.head -> 0xA1CF64, colors(1) -> 0xD95C5C, colors(2) -> 0x6ECFF5,
-    colors(3) -> 0xF05940, colors(4) -> 0x564F8A, colors.tail -> 0x00B5AD)
+  override val controls: CameraControls = new ExampleControls(camera, this.container, scene, width, height, new Vector3(0,0,0)) // TODO: uncomment
 
-  def materialParams(name: String): MeshLambertMaterialParameters = js.Dynamic.literal(
-//    color = new Color(colorMap(name)) // wireframe = true
-    color = new Color(0x564F8A) // wireframe = true
-  ).asInstanceOf[MeshLambertMaterialParameters]
-
-  def randColorName: String = colors(Random.nextInt(colors.size))
-
-  protected def nodeTagFromTitle(title: String, colorName: String) = textarea(title, `class` := s"ui large ${colorName} message").render
-
-  var meshes = addMesh(new Vector3(0, 0, 0)) :: addMesh(new Vector3(400, 0, 200)) :: addMesh(new Vector3(-400, 0, 200)) :: Nil
-
-  var sprites = List.empty[HtmlSprite]
-
-  override val controls: CameraControls = new ExampleControls(camera, this.container, scene, width, height, this.meshes.head.position.clone()) // TODO: uncomment
-
-  val light = new DirectionalLight(0xffffff, 2)
+  val light = new DirectionalLight(0x88ffff, 2)
   light.position.set(1, 1, 1).normalize()
   scene.add(light)
 
-  def addMesh(pos: Vector3 = new Vector3()): Mesh = {
-    val material = new MeshLambertMaterial(this.materialParams(randColorName))
-    val mesh: Mesh = new Mesh(geometry, material)
-    mesh.name = pos.toString
-    mesh.position.set(pos.x, pos.y, pos.z)
-    mesh
-  }
 
-//  def addLabel(pos: Vector3, title: String = "hello three.js and ScalaJS!"): HtmlSprite = {
-//    val helloHtml = nodeTagFromTitle(title, randColorName)
-//    val html = new HtmlSprite(helloHtml)
-//    html.position.set(pos.x, pos.y, pos.z)
-//    html
-//  }
+  val light2 = new DirectionalLight(0xff88ff, 2)
+  light.position.set(-1, -1, -1).normalize()
+  scene.add(light2)
 
+  val meshes = Actors.get
   meshes.foreach(scene.add)
-//  meshes.zipWithIndex.foreach {
-//    case (m, i) =>
-//      this.sprites = addLabel(m.position.clone().setY(m.position.y + 200), "Text #" + i) :: this.sprites
-//
-//  }
-  //sprites.foreach(cssScene.add)
 }
+
 // scalastyle: on
 
 /**
