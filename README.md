@@ -1,3 +1,7 @@
+3dStarter
+------------
+
+
 # Example Scala.js application 
 
 This is a slightly less barebone example of an application written in

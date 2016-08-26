@@ -1,4 +1,7 @@
 package example
+
+import org.scalajs.dom.raw.HTMLElement
+
 import scala.scalajs.js.annotation.JSExport
 import org.scalajs.dom
 import org.scalajs.dom.html
@@ -11,8 +14,17 @@ case class Point(x: Int, y: Int){
 
 @JSExport
 object ScalaJSExample {
+
+  def activate(): Unit = {
+    val el: HTMLElement = dom.document.getElementById("container").asInstanceOf[HTMLElement]
+    val demo = new ExampleScene(el, 1280, 500) // scalastyle:ignore
+    demo.render()
+//    activateCode()
+  }
+
   @JSExport
   def main(canvas: html.Canvas): Unit = {
+    //dom.window.alert("I'm here!")
     val ctx = canvas.getContext("2d")
                     .asInstanceOf[dom.CanvasRenderingContext2D]
 
@@ -38,7 +50,7 @@ object ScalaJSExample {
 
       ctx.fillRect(p.x, p.y, 1, 1)
     }
-
-    dom.setInterval(() => run, 50)
+    //dom.window.setInterval(() => run, 50)
+    activate()
   }
 }
