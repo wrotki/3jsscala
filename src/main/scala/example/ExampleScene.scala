@@ -15,7 +15,10 @@ import scalatags.JsDom.all._
 // scalastyle:off
 class ExampleScene(val container: HTMLElement, val width: Double, val height: Double) extends Container3D {
 
-  override val controls: CameraControls = new ExampleControls(camera, this.container, scene, width, height, new Vector3(0,0,0)) // TODO: uncomment
+  override val controls: CameraControls = new ExampleControls(
+    camera, this.container, scene, width, height, new Vector3(0,0,0))
+
+  setupRenderer
 
   val light = new DirectionalLight(0x88ffff, 2)
   light.position.set(1, 1, 1).normalize()
@@ -28,6 +31,27 @@ class ExampleScene(val container: HTMLElement, val width: Double, val height: Do
 
   val meshes = Actors.get
   meshes.foreach(scene.add)
+
+  private def setupRenderer:Unit ={
+    renderer.setClearColor(new Color(0x000040),0.5)
+    window.addEventListener("resize",
+      (e0: Event) => {
+        //    windowHalfX = window.innerWidth / 2;
+        //  windowHalfY = window.innerHeight / 2;
+        //  WIDTH = window.innerWidth;
+        //  HEIGHT = window.innerHeight - 2 * MARGIN;
+        //  //effectSSAO.uniforms[ 'size' ].value.set( Math.floor( SCALE * WIDTH ), Math.floor( SCALE * HEIGHT ) );
+        //  renderer.setSize( WIDTH, HEIGHT );
+        //  camera.aspect = WIDTH / HEIGHT;
+        //  camera.updateProjectionMatrix();
+        val MARGIN = 0
+        val WIDTH = window.innerWidth
+        val HEIGHT = window.innerHeight - 2 * MARGIN
+        renderer.setSize( WIDTH, HEIGHT )
+      }
+      ,false
+    )
+  }
 }
 
 // scalastyle: on

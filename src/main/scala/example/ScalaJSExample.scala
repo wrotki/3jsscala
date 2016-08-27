@@ -4,7 +4,7 @@ import org.scalajs.dom.raw.HTMLElement
 
 import scala.scalajs.js.annotation.JSExport
 import org.scalajs.dom
-import org.scalajs.dom.html
+import org.scalajs.dom._
 
 @JSExport
 object ScalaJSExample {
@@ -12,7 +12,10 @@ object ScalaJSExample {
   @JSExport
   def main(canvas: html.Canvas): Unit = {
     val el: HTMLElement = dom.document.getElementById("container").asInstanceOf[HTMLElement]
-    val demo = new ExampleScene(el, 2000, 2000) // scalastyle:ignore
+    val MARGIN = 0
+    val WIDTH = window.innerWidth
+    val HEIGHT = window.innerHeight - 2 * MARGIN
+    val demo = new ExampleScene(el, WIDTH, HEIGHT) // scalastyle:ignore
     demo.render()
   }
 }
