@@ -1,20 +1,18 @@
 package datasource
 
-import akka.actor.{ActorSystem, Props}
-import akka.io.IO
-import spray.can.Http
-import akka.pattern.ask
-import akka.util.Timeout
-import scala.concurrent.duration._
+import akka.actor.{ActorSystem}
+import spray.routing.SimpleRoutingApp
 
-object Boot extends App {
+object Boot extends App with SimpleRoutingApp {
+  implicit val system = ActorSystem("my-system")
 
-  // create our actor system with the name smartjava
-  implicit val system = ActorSystem("smartjava")
-  val service = system.actorOf(Props[SJServiceActor], "sj-rest-service")
-
-  // IO requires an implicit ActorSystem, and ? requires an implicit timeout
-  // Bind HTTP to the specified service.
-  implicit val timeout = Timeout(5.seconds)
-  IO(Http) ? Http.Bind(service, interface = "localhost", port = 8080)
+  startServer(interface = "localhost", port = 8080) {
+    path("hello") {
+      get {
+        complete {
+          <h1>Say hello to spray</h1>
+        }
+      }
+    }
+  }
 }
