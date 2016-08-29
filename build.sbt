@@ -20,6 +20,10 @@ libraryDependencies ++= Seq(
   "com.lihaoyi" %%% "scalatags" % "0.5.4",
   "org.webjars" % "three.js" % "r77"
 )
+lazy val datasource = (project in file("datasource"))
+
+lazy val root =(project in file(".")).
+  aggregate(datasource)
 
 
 bootSnippet := "example.ScalaJSExample().main(document.getElementById('canvas'));"

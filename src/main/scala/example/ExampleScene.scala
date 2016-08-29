@@ -65,7 +65,8 @@ class ExampleScene(val container: HTMLElement, val width: Double, val height: Do
   * @param center center of screen
   */
 class ExampleControls(cam: Camera, el: HTMLElement, sc: Scene, width: Double, height: Double,
-                      center: Vector3 = new Vector3()) extends JumpCameraControls(cam, el, sc, width, height, center) {
+                      center: Vector3 = new Vector3()
+                     ) extends JumpCameraControls(cam, el, sc, width, height, center) {
   import org.querki.jquery._
 
   lazy val $el = $(el)
