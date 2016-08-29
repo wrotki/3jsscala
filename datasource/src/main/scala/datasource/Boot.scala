@@ -1,13 +1,14 @@
 package datasource
 
 //  http://blog.scalac.io/2015/07/30/websockets-server-with-akka-http.html
+// http://doc.akka.io/docs/akka/2.4.9/scala/http/routing-dsl/websocket-support.html#server-side-websocket-support-scala
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Directives._
 
 import akka.stream.ActorMaterializer
-import datasource.services.{EchoService, MainService}
+import datasource.services.{PushService, EchoService, MainService}
 
 import scala.io.StdIn
 
@@ -20,7 +21,8 @@ object Server extends App {
   val port = 8080
 
   val route = MainService.route ~
-    EchoService.route
+    EchoService.route ~
+    PushService.route
 
   val binding = Http().bindAndHandle(route, interface, port)
   println(s"Server is now online at http://$interface:$port\nPress RETURN to stop...")
