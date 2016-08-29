@@ -1,9 +1,12 @@
 package datasource
 
-import spray.json.DefaultJsonProtocol
+import spray.httpx.SprayJsonSupport
+import spray.json._
+import DefaultJsonProtocol._
 
-object MyJsonProtocol extends DefaultJsonProtocol {
-  implicit val personFormat = jsonFormat3(Person)
+trait CompactJsonFormatSupport extends DefaultJsonProtocol with SprayJsonSupport {
+  implicit val printer = CompactPrinter
+  implicit val compactPrintedItemFormat = jsonFormat3(Person)
 }
 
 case class Person(name: String, firstName: String, age: Long)
