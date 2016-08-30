@@ -2,33 +2,48 @@ package datasource.services
 
 //  http://stackoverflow.com/questions/35246900/akka-http-websocket-akka-stream-use-websocket-as-a-sink
 
+import java.util
+
+import akka.NotUsed
+import akka.http.scaladsl.model.ws.TextMessage.Strict
 import akka.http.scaladsl.model.ws.{Message, TextMessage}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
-import akka.stream.scaladsl.{Sink, Source, Flow}
-import datasource.{CompactJsonFormatSupport, Person}
-import spray.json._
+import akka.stream.scaladsl.{Flow, Sink, Source}
+import com.spotify.docker.client.messages.Container
+import collection.JavaConverters._
 
+import spray.json._
+import DefaultJsonProtocol._
+
+import scala.collection.mutable
 import scala.concurrent.forkjoin.ThreadLocalRandom
 
-object PushService extends WebService with CompactJsonFormatSupport {
+trait DockerJsonProtocol extends DefaultJsonProtocol {
+  implicit val dockerImageFormat = jsonFormat1(DockerContainerData)
+}
+
+case class DockerContainerData(
+                                id: String
+                              )
+
+object PushService extends WebService with DockerJsonProtocol {
+
 
   override def route: Route =  path("status") {
-    val p = Person("John","Smith",20)
-    val src =
-      Source.fromIterator(() => Iterator.continually(ThreadLocalRandom.current.nextInt()))
-        .filter(i => i > 0 && i % 2 == 0).map(i => TextMessage(i.toString))
 
-    val src2 = Source.fromIterator(() => Iterator.continually(p)).map(p => TextMessage(p.toJson))
-    import akka.http.scaladsl.server.Directives._
+//    import sys.process._
+//
+//    val json = "curl --unix-socket /var/run/docker.sock http:/containers/json" !!
+//
+//    val src = Source(Seq(TextMessage(json)) toList)
+
+    val containers: List[Container] = (DockerService.docker.listContainers() asScala) toList
+    val containersForClient: List[Strict] = containers map { c => TextMessage(DockerContainerData(id=c.id()).toJson.toString) }
+    val src = Source(containersForClient)
 
     extractUpgradeToWebSocket { upgrade =>
-      complete(upgrade.handleMessagesWithSinkSource(Sink.ignore, src2))
+      complete(upgrade.handleMessagesWithSinkSource(Sink.ignore, src))
     }
-  }
-
-  val echoService: Flow[Message, Message, _] = Flow[Message].map {
-    case TextMessage.Strict(txt) => TextMessage("ECHO: " + txt)
-    case _ => TextMessage("Message type unsupported")
   }
 }

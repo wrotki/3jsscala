@@ -8,11 +8,14 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Directives._
 
 import akka.stream.ActorMaterializer
-import datasource.services.{PushService, EchoService, MainService}
+import datasource.services.{DockerService, PushService, EchoService, MainService}
 
 import scala.io.StdIn
+import scala.util.{Failure, Success, Try}
 
 object Server extends App {
+  DockerService.test
+
 
   implicit val actorSystem = ActorSystem("akka-system")
   implicit val flowMaterializer = ActorMaterializer()

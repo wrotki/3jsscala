@@ -6,6 +6,8 @@ scalaVersion  := "2.11.2"
 
 scalacOptions := Seq("-unchecked", "-deprecation", "-encoding", "utf8")
 
+// resolvers += "softprops-maven" at "http://dl.bintray.com/content/softprops/maven"
+
 libraryDependencies ++= {
   val akkaHttpVersion = "2.4.9"
   val akkaV = "2.4.9"
@@ -13,7 +15,7 @@ libraryDependencies ++= {
   Seq(
     "io.spray"            %%  "spray-can"     % sprayV withSources() withJavadoc(),
     "io.spray"            %%  "spray-routing" % sprayV withSources() withJavadoc(),
-    "io.spray"            %%  "spray-json"    % "1.3.1",
+    "io.spray"            %%  "spray-json"    % "1.3.2",
     "io.spray"            %%  "spray-testkit" % sprayV  % "test",
     "com.typesafe.akka"   %%  "akka-actor"    % akkaV,
     "com.typesafe.akka"   %%  "akka-testkit"  % akkaV   % "test",
@@ -22,7 +24,7 @@ libraryDependencies ++= {
     "com.typesafe.akka" %% "akka-stream" % akkaHttpVersion,
     "com.typesafe.akka" %% "akka-http-core" % akkaHttpVersion,
     "com.typesafe.akka" %% "akka-http-experimental" % akkaHttpVersion,
-    "org.java-websocket" % "Java-WebSocket" % "1.3.0"
+    "com.spotify" % "docker-client" % "5.0.2"
   )
 }
 
