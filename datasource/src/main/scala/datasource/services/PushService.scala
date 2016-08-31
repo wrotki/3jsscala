@@ -11,6 +11,7 @@ import akka.http.scaladsl.model.ws.TextMessage.Strict
 import akka.http.scaladsl.model.ws.{Message, TextMessage}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
+import akka.stream.actor.ActorPublisher
 import akka.stream.scaladsl.{Sink, Source}
 import com.spotify.docker.client.messages.Container
 import rx.lang.scala.Observable
@@ -46,7 +47,7 @@ object PushService extends WebService with DockerJsonProtocol {
 //    val src: Source[Strict, NotUsed] = Source(containersForClient)
 
     val containersSource = Source.actorPublisher[Strict](ContainerPublisher.props)
-    val dataPublisherRef = system.actorOf(Props[ContainerPublisher])
+    val dataPublisherRef = system.actorOf(ContainerPublisher.props)//Props[ContainerPublisher])
 
     val o = Observable.interval(5 seconds)
 //    o.subscribe()
@@ -60,7 +61,7 @@ object PushService extends WebService with DockerJsonProtocol {
         })
 
     extractUpgradeToWebSocket { upgrade =>
-      complete(upgrade.handleMessagesWithSinkSource(Sink.ignore, containersSource))
+      complete(upgrade.handleMessagesWithSinkSource(Sink.ignore, Source.fromPublisher(ActorPublisher(dataPublisherRef))))
     }
 
   }
