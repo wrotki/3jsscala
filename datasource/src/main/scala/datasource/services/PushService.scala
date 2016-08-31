@@ -3,15 +3,19 @@ package datasource.services
 //  http://stackoverflow.com/questions/35246900/akka-http-websocket-akka-stream-use-websocket-as-a-sink
 
 import java.util
+import java.util.concurrent.TimeUnit
 
 import akka.NotUsed
+import akka.actor.{ActorRef, Props}
 import akka.http.scaladsl.model.ws.TextMessage.Strict
 import akka.http.scaladsl.model.ws.{Message, TextMessage}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.stream.scaladsl.{Flow, Sink, Source}
 import com.spotify.docker.client.messages.Container
+import rx.{Observable, Scheduler}
 import collection.JavaConverters._
+import scala.concurrent.duration._
 
 import spray.json._
 import DefaultJsonProtocol._
@@ -40,10 +44,15 @@ object PushService extends WebService with DockerJsonProtocol {
 
     val containers: List[Container] = (DockerService.docker.listContainers() asScala) toList
     val containersForClient: List[Strict] = containers map { c => TextMessage(DockerContainerData(id=c.id()).toJson.toString) }
-    val src = Source(containersForClient)
+    val src: Source[Strict, NotUsed] = Source(containersForClient)
+
+    val containersSource = Source.actorPublisher[Strict](ContainerPublisher.props)
+
+    val o = Observable.interval(5L, TimeUnit.SECONDS)
+    o.subscribe(n => println("n = " + n))
 
     extractUpgradeToWebSocket { upgrade =>
-      complete(upgrade.handleMessagesWithSinkSource(Sink.ignore, src))
+      complete(upgrade.handleMessagesWithSinkSource(Sink.ignore, containersSource))
     }
   }
 }
