@@ -11,6 +11,9 @@ object ScalaJSExample {
 
   @JSExport
   def main(canvas: html.Canvas): Unit = {
+//    import org.denigma.threejs.THREE.RepeatWrapping
+//    var three = RepeatWrapping
+//    dom.console.log(s"THREE: $three")
     val el: HTMLElement = dom.document.getElementById("container").asInstanceOf[HTMLElement]
     val MARGIN = 0
     val WIDTH = window.innerWidth
