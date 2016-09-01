@@ -21,7 +21,7 @@ object Server extends App {
   implicit val flowMaterializer = ActorMaterializer()
 
   val interface = "localhost"
-  val port = 8080
+  val port = 8180
 
   val route = MainService.route ~
     EchoService.route ~

@@ -16,7 +16,7 @@ object PolyverseLogo {
     val logoMaterial = new MeshBasicMaterial(materialParams)
     val logoGeometry = new PlaneGeometry(300, 50, 1, 1)
     val logo = new Mesh(logoGeometry, logoMaterial)
-    logo.position.set(0,150,0)
+    logo.position.set(0,150,-100)
     logo
   }
 

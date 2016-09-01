@@ -19,7 +19,7 @@ import scalatags.JsDom.all._
 class ExampleScene(val container: HTMLElement, val width: Double, val height: Double) extends Container3D {
 
 
-  camera.position.y = 10
+  camera.position.y = 150
   camera.position.z = 500
   override val controls: CameraControls = new ExampleControls(
     camera, this.container, scene, width, height, new Vector3(0,0,0))
@@ -42,19 +42,25 @@ class ExampleScene(val container: HTMLElement, val width: Double, val height: Do
 
   val datasource = new WebSocket(getWebsocketUri(org.scalajs.dom.document, "status"))
 
+  var prevContainers = Seq[Object3D]()
+
   datasource.onmessage = { (event: MessageEvent) ⇒
     dom.console.log(event.data.toString)
-    val depickled = read[Map[String,String]](event.data.toString)
-    val containerLabels = (depickled map { _._2} toList).zipWithIndex map { t => Label(t._1,new Vector3(0,20 + 50 * t._2,20 + 50 * t._2)) } toSeq
+    val depickled = read[Seq[String]](event.data.toString)
+    val labelsZipped = depickled.zipWithIndex
+    val containerLabels = labelsZipped map { t =>
+      Label(t._1,new Vector3(0,20,-200 + 30 * t._2))
+    }
 
-    meshes filter { !constantMeshes.contains(_) } foreach(scene.remove)
-    containerLabels  foreach(scene.add)
+    prevContainers foreach scene.remove
+    /* Actors.get ++ */containerLabels foreach scene.add
+    prevContainers = containerLabels
   }
 
   private def getWebsocketUri(document: Document, socketId: String): String = {
     val wsProtocol = if (org.scalajs.dom.document.location.protocol == "https:") "wss" else "ws"
 
-    s"$wsProtocol://127.0.0.1:8080/$socketId"
+    s"$wsProtocol://127.0.0.1:8180/$socketId"
   }
 
   private def setupRenderer:Unit ={

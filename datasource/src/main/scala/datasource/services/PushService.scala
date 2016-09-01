@@ -20,9 +20,6 @@ import scala.concurrent.duration._
 
 import spray.json._
 
-import scala.collection.mutable
-import scala.concurrent.forkjoin.ThreadLocalRandom
-
 trait DockerJsonProtocol extends DefaultJsonProtocol {
   implicit val dockerImageFormat = jsonFormat1(DockerContainerData)
 }
@@ -36,28 +33,14 @@ object PushService extends WebService with DockerJsonProtocol {
   implicit val system = ActorSystem()
   override def route: Route =  path("status") {
 
-//    import sys.process._
-//
-//    val json = "curl --unix-socket /var/run/docker.sock http:/containers/json" !!
-//
-//    val src = Source(Seq(TextMessage(json)) toList)
-
-//    val containers: List[Container] = (DockerService.docker.listContainers() asScala) toList
-//    val containersForClient: List[Strict] = containers map { c => TextMessage(DockerContainerData(id=c.id()).toJson.toString) }
-//    val src: Source[Strict, NotUsed] = Source(containersForClient)
-
     val containersSource = Source.actorPublisher[Strict](ContainerPublisher.props)
-    val dataPublisherRef = system.actorOf(ContainerPublisher.props)//Props[ContainerPublisher])
+    val dataPublisherRef = system.actorOf(ContainerPublisher.props)
 
     val o = Observable.interval(1 seconds)
-//    o.subscribe()
-//        o.subscribe( n => println("n:"+ n) )
         o.subscribe( (n) => {
             val containers: Seq[Container] = DockerService.docker.listContainers().asScala
-            containers foreach {
-              dataPublisherRef ! _
-            }
-          println("sent")
+            dataPublisherRef ! containers
+            println("sent")
         })
 
     extractUpgradeToWebSocket { upgrade =>

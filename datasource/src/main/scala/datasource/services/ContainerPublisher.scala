@@ -14,9 +14,10 @@ object ContainerPublisher {
 class ContainerPublisher extends ActorPublisher[TextMessage.Strict] with DockerJsonProtocol {
 
   def receive = {
-    case container: Container =>
-      val containerName = (container.names().asScala toSeq).mkString
-      onNext(TextMessage(DockerContainerData(id=containerName).toJson.toString))
+    case containers: Seq[Container] =>
+
+      val containerNames = containers map { c => c.names().asScala mkString }
+      onNext(TextMessage(containerNames.toJson.toString))
     case x =>
       println(s"ContainerPublisher Actor received: $x")
 
