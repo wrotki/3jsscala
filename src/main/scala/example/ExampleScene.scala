@@ -5,6 +5,7 @@ import org.denigma.threejs.extensions.controls.{JumpCameraControls, CameraContro
 import org.denigma.threejs.extras.HtmlSprite
 import org.denigma.threejs._
 import org.denigma.threejs.extensions.Container3D
+import org.scalajs.dom
 import org.scalajs.dom._
 import org.scalajs.dom.raw.HTMLElement
 
@@ -15,6 +16,11 @@ import scalatags.JsDom.all._
 // scalastyle:off
 class ExampleScene(val container: HTMLElement, val width: Double, val height: Double) extends Container3D {
 
+  val datasource = new WebSocket(getWebsocketUri(org.scalajs.dom.document, "status"))
+
+  datasource.onmessage = { (event: MessageEvent) ⇒
+    dom.console.log(event.data.toString)
+  }
   override val controls: CameraControls = new ExampleControls(
     camera, this.container, scene, width, height, new Vector3(0,0,0))
 
@@ -31,6 +37,12 @@ class ExampleScene(val container: HTMLElement, val width: Double, val height: Do
 
   val meshes = Actors.get
   meshes.foreach(scene.add)
+
+  private def getWebsocketUri(document: Document, socketId: String): String = {
+    val wsProtocol = if (org.scalajs.dom.document.location.protocol == "https:") "wss" else "ws"
+
+    s"$wsProtocol://127.0.0.1:8080/$socketId"
+  }
 
   private def setupRenderer:Unit ={
     renderer.setClearColor(new Color(0x000040),0.5)
