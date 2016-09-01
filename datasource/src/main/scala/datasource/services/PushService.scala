@@ -49,7 +49,7 @@ object PushService extends WebService with DockerJsonProtocol {
     val containersSource = Source.actorPublisher[Strict](ContainerPublisher.props)
     val dataPublisherRef = system.actorOf(ContainerPublisher.props)//Props[ContainerPublisher])
 
-    val o = Observable.interval(5 seconds)
+    val o = Observable.interval(1 seconds)
 //    o.subscribe()
 //        o.subscribe( n => println("n:"+ n) )
         o.subscribe( (n) => {

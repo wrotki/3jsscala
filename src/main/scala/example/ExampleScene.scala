@@ -1,6 +1,6 @@
 package example
 
-import objects3d.Actors
+import objects3d.{Label, Actors}
 import org.denigma.threejs.extensions.controls.{JumpCameraControls, CameraControls}
 import org.denigma.threejs.extras.HtmlSprite
 import org.denigma.threejs._
@@ -8,6 +8,8 @@ import org.denigma.threejs.extensions.Container3D
 import org.scalajs.dom
 import org.scalajs.dom._
 import org.scalajs.dom.raw.HTMLElement
+import upickle.default._
+
 
 import scala.scalajs.js
 import scala.util.Random
@@ -16,11 +18,9 @@ import scalatags.JsDom.all._
 // scalastyle:off
 class ExampleScene(val container: HTMLElement, val width: Double, val height: Double) extends Container3D {
 
-  val datasource = new WebSocket(getWebsocketUri(org.scalajs.dom.document, "status"))
 
-  datasource.onmessage = { (event: MessageEvent) ⇒
-    dom.console.log(event.data.toString)
-  }
+  camera.position.y = 10
+  camera.position.z = 500
   override val controls: CameraControls = new ExampleControls(
     camera, this.container, scene, width, height, new Vector3(0,0,0))
 
@@ -35,8 +35,21 @@ class ExampleScene(val container: HTMLElement, val width: Double, val height: Do
   light.position.set(-1, -1, -1).normalize()
   scene.add(light2)
 
-  val meshes = Actors.get
-  meshes.foreach(scene.add)
+
+  val constantMeshes = Actors.get
+  var meshes = constantMeshes
+  meshes foreach(scene.add)
+
+  val datasource = new WebSocket(getWebsocketUri(org.scalajs.dom.document, "status"))
+
+  datasource.onmessage = { (event: MessageEvent) ⇒
+    dom.console.log(event.data.toString)
+    val depickled = read[Map[String,String]](event.data.toString)
+    val containerLabels = (depickled map { _._2} toList).zipWithIndex map { t => Label(t._1,new Vector3(0,20 + 50 * t._2,20 + 50 * t._2)) } toSeq
+
+    meshes filter { !constantMeshes.contains(_) } foreach(scene.remove)
+    containerLabels  foreach(scene.add)
+  }
 
   private def getWebsocketUri(document: Document, socketId: String): String = {
     val wsProtocol = if (org.scalajs.dom.document.location.protocol == "https:") "wss" else "ws"

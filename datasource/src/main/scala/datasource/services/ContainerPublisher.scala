@@ -5,6 +5,7 @@ import akka.http.scaladsl.model.ws.TextMessage
 import akka.stream.actor.ActorPublisher
 import com.spotify.docker.client.messages.Container
 import spray.json._
+import collection.JavaConverters._
 
 
 object ContainerPublisher {
@@ -14,7 +15,8 @@ class ContainerPublisher extends ActorPublisher[TextMessage.Strict] with DockerJ
 
   def receive = {
     case container: Container =>
-      onNext(TextMessage(DockerContainerData(id=container.id).toJson.toString))
+      val containerName = (container.names().asScala toSeq).mkString
+      onNext(TextMessage(DockerContainerData(id=containerName).toJson.toString))
     case x =>
       println(s"ContainerPublisher Actor received: $x")
 

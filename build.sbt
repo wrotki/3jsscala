@@ -18,6 +18,7 @@ libraryDependencies ++= Seq(
   "org.querki" %%% "querki-jsext" % "0.7", //useful scalajs extensions
   "org.scala-js" %%% "scalajs-dom" % "0.8.2",
   "com.lihaoyi" %%% "scalatags" % "0.5.4",
+  "com.lihaoyi" %%% "upickle" % "0.4.1",
   "org.webjars" % "three.js" % "r77"
 )
 lazy val datasource = (project in file("datasource"))

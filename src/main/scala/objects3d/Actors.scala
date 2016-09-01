@@ -14,8 +14,8 @@ object Actors {
   ).asInstanceOf[MeshLambertMaterialParameters]
 
   def get: Seq[Object3D] = {
-    val objects3d = 0 to 100 map { i: Int =>
-        new Vector3(Math.sin(i.toDouble/10.0)*100,i*10,Math.cos(i.toDouble/10.0)*100)
+    val objects3d = 0 to 5 map { i: Int =>
+        new Vector3(Math.sin(i.toDouble/10.0)*100,i*10,Math.cos(i.toDouble/10.0)*100-5000)
     } map { v: Vector3 =>
       val geometry = new BoxGeometry(10, 10, 10)
       val material = new MeshLambertMaterial(materialParams)
@@ -24,6 +24,6 @@ object Actors {
       mesh.position.set(v.x, v.y, v.z)
       mesh
     }
-    objects3d :+ Floor()
+    /* objects3d */ Seq[Object3D]() :+ Floor() :+ PolyverseLogo() //:+ Label("Foo",new Vector3(0,30,0)) :+ Label("Bar",new Vector3(100,30,0))
   }
 }
