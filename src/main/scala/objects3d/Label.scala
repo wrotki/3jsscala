@@ -19,7 +19,7 @@ object Label {
     val metrics = xc.measureText( text )
     val borderThickness = 2
     val textWidth = metrics.width
-    xc.fillStyle = "rgba(255,255,155,0.5)"
+    xc.fillStyle = "rgba(255,255,155,0.8)"
     xc.strokeStyle = "#000"
     xc.lineWidth = borderThickness
     xc.font = fontSize+"pt arial bold"

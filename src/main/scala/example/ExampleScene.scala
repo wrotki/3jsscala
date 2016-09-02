@@ -49,13 +49,21 @@ class ExampleScene(val container: HTMLElement, val width: Double, val height: Do
     val depickled = read[Seq[String]](event.data.toString)
     val labelsZipped = depickled.zipWithIndex
     val containerLabels = labelsZipped map { t =>
-      Label(t._1,new Vector3(0,20,-200 + 30 * t._2))
+      Label(t._1,labelLocation(t._2))
     }
 
     prevContainers foreach scene.remove
     /* Actors.get ++ */containerLabels foreach scene.add
     prevContainers = containerLabels
   }
+
+  def labelLocation(i: Int):Vector3 = {
+    val x = -Math.sin(i.toDouble/30.0) * 500
+    val y = 40 + Math.sin(i.toDouble/30.0) * 300
+    val z = -200 + Math.cos(i.toDouble/30.0) * 300
+    new Vector3(x,y,z)
+  }
+
 
   private def getWebsocketUri(document: Document, socketId: String): String = {
     val wsProtocol = if (org.scalajs.dom.document.location.protocol == "https:") "wss" else "ws"
