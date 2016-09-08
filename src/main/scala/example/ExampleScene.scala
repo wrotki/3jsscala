@@ -1,8 +1,8 @@
 package example
 
-import objects3d.{Label, Actors}
+import libs.Tween
+import objects3d.{LayoutCurve, SignedBox, Label, Actors}
 import org.denigma.threejs.extensions.controls.{JumpCameraControls, CameraControls}
-import org.denigma.threejs.extras.HtmlSprite
 import org.denigma.threejs._
 import org.denigma.threejs.extensions.Container3D
 import org.scalajs.dom
@@ -10,19 +10,14 @@ import org.scalajs.dom._
 import org.scalajs.dom.raw.HTMLElement
 import upickle.default._
 
-
-import scala.scalajs.js
-import scala.util.Random
-import scalatags.JsDom.all._
-
 // scalastyle:off
 class ExampleScene(val container: HTMLElement, val width: Double, val height: Double) extends Container3D {
 
 
   camera.position.y = 150
   camera.position.z = 500
-  override val controls: CameraControls = new ExampleControls(
-    camera, this.container, scene, width, height, new Vector3(0,0,0))
+//  override val controls: CameraControls = new ExampleControls(
+//    camera, this.container, scene, width, height, new Vector3(0,0,0))
 
   setupRenderer
 
@@ -45,12 +40,19 @@ class ExampleScene(val container: HTMLElement, val width: Double, val height: Do
   var prevContainers = Seq[Object3D]()
 
   datasource.onmessage = { (event: MessageEvent) ⇒
-    dom.console.log(event.data.toString)
+    //dom.console.log(event.data.toString)
     val depickled = read[Seq[String]](event.data.toString)
     val labelsZipped = depickled.zipWithIndex
     val containerLabels = labelsZipped map { t =>
-      Label(t._1,labelLocation(t._2))
+      val box = SignedBox(t._1)//Label(t._1,labelLocation(t._2))
+      val p =labelLocation(t._2)
+      //dom.console.log("Container location: "+p.x+","+p.y+","+p.z)
+      box.position.set(p.x,p.y,p.z)
+//      val newTween = Tween.get(box.position)
+//      newTween.to(p,1000)
+      box
     }
+
 
     prevContainers foreach scene.remove
     /* Actors.get ++ */containerLabels foreach scene.add
@@ -58,10 +60,7 @@ class ExampleScene(val container: HTMLElement, val width: Double, val height: Do
   }
 
   def labelLocation(i: Int):Vector3 = {
-    val x = -Math.sin(i.toDouble/30.0) * 500
-    val y = 40 + Math.sin(i.toDouble/30.0) * 300
-    val z = -200 + Math.cos(i.toDouble/30.0) * 300
-    new Vector3(x,y,z)
+    LayoutCurve.grid(i)
   }
 
 
@@ -75,14 +74,6 @@ class ExampleScene(val container: HTMLElement, val width: Double, val height: Do
     renderer.setClearColor(new Color(0x000040),0.5)
     window.addEventListener("resize",
       (e0: Event) => {
-        //    windowHalfX = window.innerWidth / 2;
-        //  windowHalfY = window.innerHeight / 2;
-        //  WIDTH = window.innerWidth;
-        //  HEIGHT = window.innerHeight - 2 * MARGIN;
-        //  //effectSSAO.uniforms[ 'size' ].value.set( Math.floor( SCALE * WIDTH ), Math.floor( SCALE * HEIGHT ) );
-        //  renderer.setSize( WIDTH, HEIGHT );
-        //  camera.aspect = WIDTH / HEIGHT;
-        //  camera.updateProjectionMatrix();
         val MARGIN = 0
         val WIDTH = window.innerWidth
         val HEIGHT = window.innerHeight - 2 * MARGIN

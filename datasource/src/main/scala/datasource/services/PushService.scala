@@ -40,7 +40,7 @@ object PushService extends WebService with DockerJsonProtocol {
         o.subscribe( (n) => {
             val containers: Seq[Container] = DockerService.docker.listContainers().asScala
             dataPublisherRef ! containers
-            println("sent")
+            //println("sent")
         })
 
     extractUpgradeToWebSocket { upgrade =>
