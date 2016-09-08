@@ -24,6 +24,6 @@ object Actors {
       mesh.position.set(v.x, v.y, v.z)
       mesh
     }
-    /* objects3d */ Seq[Object3D]() :+ Floor() :+ PolyverseLogo() //:+ Label("Foo",new Vector3(0,30,0)) :+ Label("Bar",new Vector3(100,30,0))
+    /* objects3d */ Seq[Object3D]() :+ SkyBox() :+ Floor() :+ PolyverseLogo() //:+ Label("Foo",new Vector3(0,30,0)) :+ Label("Bar",new Vector3(100,30,0))
   }
 }

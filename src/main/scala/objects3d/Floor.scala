@@ -8,7 +8,7 @@ object Floor {
   def createMesh: Object3D = {
     import org.denigma.threejs._
     // note: 4x4 checkboard pattern scaled so that each square is 25 by 25 pixels.
-    val floorTexture = ImageUtils.loadTexture( Resources.loadPath("/3d/checkerboard.jpg") )
+    val floorTexture = ImageUtils.loadTexture( Resources.loadPath("/3d/bluebackgrnd.png") )
     floorTexture.wrapS = 1000.asInstanceOf[Wrapping] //THREE.RepeatWrapping
     floorTexture.wrapT = 1000.asInstanceOf[Wrapping] //THREE.RepeatWrapping
     floorTexture.repeat.set( 10, 10 )

@@ -18,18 +18,6 @@
 <script type="text/javascript" src="../example-fastopt.js"></script>
 <script type="text/javascript" src="/workbench.js"></script>
 <script>
-    var target = {
-        "alpha": 1
-    };
-    target.alpha = 1;
-    createjs.Tween.get(target)
-         .wait(500)
-         .to({alpha:0, visible:false}, 1000)
-         .call(handleComplete);
-    function handleComplete() {
-        //Tween complete
-    }
-
     example.ScalaJSExample().main(document.getElementById('canvas'));
 </script>
 </body>

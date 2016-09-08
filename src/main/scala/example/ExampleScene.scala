@@ -1,14 +1,15 @@
 package example
 
-import libs.Tween
 import objects3d.{LayoutCurve, SignedBox, Label, Actors}
 import org.denigma.threejs.extensions.controls.{JumpCameraControls, CameraControls}
 import org.denigma.threejs._
 import org.denigma.threejs.extensions.Container3D
-import org.scalajs.dom
 import org.scalajs.dom._
 import org.scalajs.dom.raw.HTMLElement
 import upickle.default._
+import com.scalawarrior.scalajs.createjs.{Ease, Tween}
+
+import scala.scalajs.js
 
 // scalastyle:off
 class ExampleScene(val container: HTMLElement, val width: Double, val height: Double) extends Container3D {
@@ -45,11 +46,12 @@ class ExampleScene(val container: HTMLElement, val width: Double, val height: Do
     val labelsZipped = depickled.zipWithIndex
     val containerLabels = labelsZipped map { t =>
       val box = SignedBox(t._1)//Label(t._1,labelLocation(t._2))
-      val p =labelLocation(t._2)
-      //dom.console.log("Container location: "+p.x+","+p.y+","+p.z)
-      box.position.set(p.x,p.y,p.z)
-//      val newTween = Tween.get(box.position)
-//      newTween.to(p,1000)
+      box.position.set(-500,400,-500)
+      val p = labelLocation(t._2)
+      val pl = js.Dynamic.literal(x = p.x, y = p.y, z = p.z)
+      Tween.get(box.position).to(pl,700,Ease.backInOut).onChange = () => {
+        box.position.set(box.position.x,box.position.y,box.position.z)
+      }
       box
     }
 
