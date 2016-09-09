@@ -15,8 +15,9 @@ import scala.scalajs.js
 class ExampleScene(val container: HTMLElement, val width: Double, val height: Double) extends Container3D {
 
 
-  camera.position.y = 550
-  camera.position.z = 500
+  camera.position.x = -250
+  camera.position.y = 250
+  camera.position.z = -1400
 //  override val controls: CameraControls = new ExampleControls(
 //    camera, this.container, scene, width, height, new Vector3(0,0,0))
 
