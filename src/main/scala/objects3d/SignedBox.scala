@@ -18,7 +18,7 @@ object SignedBox {
     val textMaterial = new MeshBasicMaterial(materialParams).asInstanceOf[Material]
     val materialArray = js.Array(textMaterial,textMaterial,textMaterial,textMaterial,textMaterial,textMaterial)
     val meshFaceMat = new MeshFaceMaterial(materialArray)
-    val cubeGeom = new BoxGeometry(30,10,10,1,1,1)
+    val cubeGeom = new BoxGeometry(60,10,10,1,1,1)
     val boxMesh = new Mesh(cubeGeom,meshFaceMat)
     boxMesh
   }

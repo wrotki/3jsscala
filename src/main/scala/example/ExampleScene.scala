@@ -15,7 +15,7 @@ import scala.scalajs.js
 class ExampleScene(val container: HTMLElement, val width: Double, val height: Double) extends Container3D {
 
 
-  camera.position.y = 150
+  camera.position.y = 550
   camera.position.z = 500
 //  override val controls: CameraControls = new ExampleControls(
 //    camera, this.container, scene, width, height, new Vector3(0,0,0))
@@ -45,11 +45,11 @@ class ExampleScene(val container: HTMLElement, val width: Double, val height: Do
     val depickled = read[Seq[String]](event.data.toString)
     val labelsZipped = depickled.zipWithIndex
     val containerLabels = labelsZipped map { t =>
-      val box = SignedBox(t._1)//Label(t._1,labelLocation(t._2))
-      box.position.set(-500,400,-500)
+      val box = SignedBox(t._1.substring(1))//Label(t._1,labelLocation(t._2))
+      box.position.set(5500,1400,-20000)
       val p = labelLocation(t._2)
       val pl = js.Dynamic.literal(x = p.x, y = p.y, z = p.z)
-      Tween.get(box.position).to(pl,700,Ease.backInOut).onChange = () => {
+      Tween.get(box.position).wait(t._2 * 150,false).to(pl,3000,Ease.getPowInOut(4)).onChange = () => {
         box.position.set(box.position.x,box.position.y,box.position.z)
       }
       box

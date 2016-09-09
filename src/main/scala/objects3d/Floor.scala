@@ -20,7 +20,7 @@ object Floor {
     val floorMaterial = new MeshBasicMaterial(materialParams)
     val floorGeometry = new PlaneGeometry(1000, 1000, 1, 1)
     val floor = new Mesh(floorGeometry, floorMaterial)
-    floor.position.set(0,0,0)
+    floor.position.set(0,-250,0)
     floor.rotation.set(Math.PI/2,0,0)
     floor
   }

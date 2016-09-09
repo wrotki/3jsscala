@@ -1,6 +1,6 @@
 package objects3d
 
-import org.denigma.threejs.Texture
+import org.denigma.threejs.{Wrapping, Texture}
 import org.scalajs.dom
 import org.scalajs.dom.html._
 
@@ -8,13 +8,13 @@ import org.scalajs.dom.html._
 object LabelTexture {
 
   def apply(text: String): Texture = {
-    val (w,h) = (256,256)
+    val (w,h) = (512,128)
     val canvas = dom.document.createElement( "canvas" ).asInstanceOf[Canvas]
     canvas.width = w
     canvas.height = h
     ///dom.console.log("Canvas width: "+canvas.width+" height: "+canvas.height)
     val xc = canvas.getContext("2d").asInstanceOf[dom.CanvasRenderingContext2D]
-    val fontSize = 12
+    val fontSize = 24
     xc.font = "Bold "+fontSize+"px Arial"
     val metrics = xc.measureText( text )
     val borderThickness = 2
@@ -29,8 +29,13 @@ object LabelTexture {
     xc.font = fontSize+"pt arial bold"
     //roundRect(xc, borderThickness/2, borderThickness/2, textWidth * 1.2 + borderThickness , fontSize * 1.2 + borderThickness, 6)
     xc.fillStyle = "#000"
-    xc.fillText(text, 10 + borderThickness+1, 48 + fontSize + borderThickness+1)
+    xc.fillText(text, borderThickness+1, 48 + fontSize + borderThickness+1)
     val texture = new Texture(canvas)
+    //texture.wrapS = 1000.asInstanceOf[Wrapping] //THREE.RepeatWrapping
+    //texture.wrapT = 1000.asInstanceOf[Wrapping] //THREE.RepeatWrapping
+//    texture.wrapS = 1022.asInstanceOf[Wrapping] //THREE.ClampToEdgeWrapping
+//    texture.wrapT = 1022.asInstanceOf[Wrapping] //THREE.ClampToEdgeWrapping
+    //texture.repeat.set(50,10)
     texture.needsUpdate = true
     texture
   }
