@@ -39,31 +39,42 @@ class ExampleScene(val container: HTMLElement, val width: Double, val height: Do
 
   val datasource = new WebSocket(getWebsocketUri(org.scalajs.dom.document, "status"))
 
-  var prevContainers = Seq[Object3D]()
+  var prevContainers = Map[String,Object3D]()
+  var newContainers = Map[String,Object3D]()
+  var garbageContainers = Map[String,Object3D]()
 
-  datasource.onmessage = { (event: MessageEvent) ⇒
+  datasource.onmessage = (event: MessageEvent) => handleContainersUpdate(event)
+
+  private def handleContainersUpdate(event: MessageEvent): Unit = {
     //dom.console.log(event.data.toString)
     val depickled = read[Seq[String]](event.data.toString)
     val labelsZipped = depickled.zipWithIndex
-    val containerLabels = labelsZipped map { t =>
-      val box = SignedBox(t._1.substring(1))//Label(t._1,labelLocation(t._2))
-      box.position.set(5500,1400,-20000)
-      val p = labelLocation(t._2)
-      val pl = js.Dynamic.literal(x = p.x, y = p.y, z = p.z)
-      Tween.get(box.position).wait(t._2 * 150,false).to(pl,3000,Ease.getPowInOut(4)).onChange = () => {
-        box.position.set(box.position.x,box.position.y,box.position.z)
-      }
-      box
-    }
 
+    val currentContainers = createContainerSetMeshes(new Vector3(0,0,0),depickled)
 
-    prevContainers foreach scene.remove
-    /* Actors.get ++ */containerLabels foreach scene.add
-    prevContainers = containerLabels
+    val newContainerKeys =  (currentContainers.keys toSet) -- prevContainers.keys toSet
+    val removedContainerKeys = (prevContainers.keys toSet) -- currentContainers.keys toSet
+
+    removedContainerKeys map {prevContainers(_)} foreach scene.remove
+    /* Actors.get ++ */ currentContainers map {_._2} foreach scene.add
+    prevContainers = currentContainers
   }
 
-  def labelLocation(i: Int):Vector3 = {
-    LayoutCurve.grid(i)
+  def createContainerSetMeshes(curveStart: Vector3, containerNames: Seq[String]): Map[String,Object3D] = {
+    containerNames.zipWithIndex map { t =>
+        val box = SignedBox(t._1.substring(1))
+        box.position.set(5500, 1400, -20000)
+        val p = ContainerMeshLocation(new Vector3(),t._2)
+        val pl = js.Dynamic.literal(x = p.x, y = p.y, z = p.z)
+        Tween.get(box.position).wait(t._2 * 150, false).to(pl, 3000, Ease.getPowInOut(4)).onChange = () => {
+          box.position.set(box.position.x, box.position.y, box.position.z)
+        }
+        (t._1,box)
+      } toMap
+  }
+
+  def ContainerMeshLocation(curveStart: Vector3, i: Int):Vector3 = {
+    curveStart.add(LayoutCurve.grid(i))
   }
 
 
