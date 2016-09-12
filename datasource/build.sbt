@@ -25,6 +25,7 @@ libraryDependencies ++= {
     "com.typesafe.akka" %% "akka-http-core" % akkaHttpVersion,
     "com.typesafe.akka" %% "akka-http-experimental" % akkaHttpVersion,
     "com.spotify" % "docker-client" % "5.0.2",
+    "com.lihaoyi" %% "upickle" % "0.4.1",
     "io.reactivex" % "rxscala_2.11" % "0.26.2"
   )
 }

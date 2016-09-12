@@ -6,9 +6,9 @@ import DefaultJsonProtocol._
 
 trait CompactJsonFormatSupport extends DefaultJsonProtocol with SprayJsonSupport {
   implicit val printer = CompactPrinter
-  implicit val compactPrintedItemFormat = jsonFormat3(Person)
-//  implicit val diPrintedItemFormat = jsonFormat6(DockerImage)
-//  implicit val rtPrintedItemFormat = jsonFormat2(RepositoryTag)
+  implicit val dockerImageFormat = jsonFormat2(DockerContainerData)
+  implicit val dockerStateItemFormat = jsonFormat3(DockerState)
 }
 
-case class Person(name: String, firstName: String, age: Long)
+case class DockerContainerData(id: String, name: String)
+case class DockerState(containers: Seq[DockerContainerData],servers: Seq[String], holdingTank: Seq[String])

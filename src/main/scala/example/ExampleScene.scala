@@ -4,6 +4,7 @@ import objects3d.{LayoutCurve, SignedBox, Label, Actors}
 import org.denigma.threejs.extensions.controls.{JumpCameraControls, CameraControls}
 import org.denigma.threejs._
 import org.denigma.threejs.extensions.Container3D
+import org.scalajs.dom
 import org.scalajs.dom._
 import org.scalajs.dom.raw.HTMLElement
 import upickle.default._
@@ -45,12 +46,15 @@ class ExampleScene(val container: HTMLElement, val width: Double, val height: Do
 
   datasource.onmessage = (event: MessageEvent) => handleContainersUpdate(event)
 
-  private def handleContainersUpdate(event: MessageEvent): Unit = {
-    //dom.console.log(event.data.toString)
-    val depickled = read[Seq[String]](event.data.toString)
-    val labelsZipped = depickled.zipWithIndex
+  case class DockerContainerData(id: String, name: String)
+  case class DockerState(containers: Seq[DockerContainerData],servers: Seq[String], holdingTank: Seq[String])
 
-    val currentContainers = createContainerSetMeshes(new Vector3(0,0,0),depickled)
+  private def handleContainersUpdate(event: MessageEvent): Unit = {
+    dom.console.log(event.data.toString)
+    val depickled = read[DockerState](event.data.toString)
+    val labelsZipped = depickled.containers.zipWithIndex
+
+    val currentContainers = createContainerSetMeshes(new Vector3(0,0,0),depickled.containers)
 
     val newContainerKeys =  (currentContainers.keys toSet) -- prevContainers.keys toSet
     val removedContainerKeys = (prevContainers.keys toSet) -- currentContainers.keys toSet
@@ -60,16 +64,16 @@ class ExampleScene(val container: HTMLElement, val width: Double, val height: Do
     prevContainers = currentContainers
   }
 
-  def createContainerSetMeshes(curveStart: Vector3, containerNames: Seq[String]): Map[String,Object3D] = {
-    containerNames.zipWithIndex map { t =>
-        val box = SignedBox(t._1.substring(1))
+  def createContainerSetMeshes(curveStart: Vector3, containers: Seq[DockerContainerData]): Map[String,Object3D] = {
+    containers.zipWithIndex map { t =>
+        val box = SignedBox(t._1.name)
         box.position.set(5500, 1400, -20000)
         val p = ContainerMeshLocation(new Vector3(),t._2)
         val pl = js.Dynamic.literal(x = p.x, y = p.y, z = p.z)
         Tween.get(box.position).wait(t._2 * 150, false).to(pl, 3000, Ease.getPowInOut(4)).onChange = () => {
           box.position.set(box.position.x, box.position.y, box.position.z)
         }
-        (t._1,box)
+        (t._1.name,box)
       } toMap
   }
 
