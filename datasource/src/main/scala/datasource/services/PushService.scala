@@ -27,22 +27,26 @@ object PushService extends WebService with CompactJsonFormatSupport {
     val dataPublisherRef = system.actorOf(ContainerPublisher.props)
 
     val o = Observable.interval(10 seconds)
-    o.subscribe((n) => {
-      val svrs = servers.split("\n").toSeq map { line:String =>
-        val depickled = read[Map[String,String]](line)
-        depickled("ContainerName")
-      }
-      println("Servers:" + svrs)
-      val hTank = holdingTank.split("\n").toSeq map { line: String =>
-        val segs = line.split("/")
-        segs(3)
-      }
-      println("Holding tank:" + hTank)
-      val containers: Seq[DockerContainerData] = DockerService.docker.listContainers().asScala map { c => DockerContainerData( id = c.id(), name=(c.names().asScala mkString).substring(1)) }
+      .onErrorReturn(e => 0L)
+      .subscribe((n) => {
+        val svrs = servers.split("\n").toSeq map { line: String =>
+          val depickled = read[Map[String, String]](line)
+          depickled("ContainerName")
+        }
+        println("Servers:" + svrs)
+        val hTank = holdingTank.split("\n").toSeq map { line: String =>
+          val segs = line.split("/")
+          if (segs.length>3) segs(3) else ""
+        } filter { s => !s.isEmpty }
+        println("Holding tank:" + hTank)
+        val containers: Seq[DockerContainerData] = DockerService.docker.listContainers().asScala map { c => DockerContainerData(id = c.id(), name = (c.names().asScala mkString).substring(1)) }
 
-      dataPublisherRef ! DockerState(containers = containers,servers= svrs,holdingTank=hTank)
-      //println("sent")
-    })
+        dataPublisherRef ! DockerState(containers = containers, servers = svrs, holdingTank = hTank)
+        //println("sent")
+      },
+        e => println(e))
+
+
 
     extractUpgradeToWebSocket { upgrade =>
       complete(upgrade.handleMessagesWithSinkSource(Sink.ignore, Source.fromPublisher(ActorPublisher(dataPublisherRef))))
@@ -60,7 +64,7 @@ object PushService extends WebService with CompactJsonFormatSupport {
 
   def holdingTank: String = {
     val cmd = Try("docker exec polyverse_etcd_1 /etcdctl ls --recursive / " #|
-      "grep holdingtank/"  !!)
+      "grep holdingtank/" !!)
     if (cmd.isSuccess) cmd.get
     else ""
   }

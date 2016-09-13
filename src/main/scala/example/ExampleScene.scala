@@ -7,6 +7,7 @@ import org.denigma.threejs.extensions.Container3D
 import org.scalajs.dom
 import org.scalajs.dom._
 import org.scalajs.dom.raw.HTMLElement
+import polyverse.{DockerContainerData, Cluster}
 import upickle.default._
 import com.scalawarrior.scalajs.createjs.{Ease, Tween}
 
@@ -40,26 +41,31 @@ class ExampleScene(val container: HTMLElement, val width: Double, val height: Do
 
   val datasource = new WebSocket(getWebsocketUri(org.scalajs.dom.document, "status"))
 
-  var prevContainers = Map[String,Object3D]()
-  var newContainers = Map[String,Object3D]()
-  var garbageContainers = Map[String,Object3D]()
+  var clusterState = Cluster(Seq(),Seq(),Seq())
+
+//  var prevContainers = Map[String,Object3D]()
+//  var newContainers = Map[String,Object3D]()
+//  var garbageContainers = Map[String,Object3D]()
+  var containersInScene = Map[String,Object3D]()
 
   datasource.onmessage = (event: MessageEvent) => handleContainersUpdate(event)
 
-  case class DockerContainerData(id: String, name: String)
-  case class DockerState(containers: Seq[DockerContainerData],servers: Seq[String], holdingTank: Seq[String])
 
   private def handleContainersUpdate(event: MessageEvent): Unit = {
     dom.console.log(event.data.toString)
-    val depickled = read[DockerState](event.data.toString)
-    val labelsZipped = depickled.containers.zipWithIndex
+    val priorClusterState = clusterState
+    clusterState = Cluster(event.data.toString)
+    clusterState.priorClusterState = priorClusterState
 
-    val currentContainers = createContainerSetMeshes(new Vector3(0,0,0),depickled.containers)
+    val labelsZipped = clusterState.containers.zipWithIndex
 
-    val newContainerKeys =  (currentContainers.keys toSet) -- prevContainers.keys toSet
-    val removedContainerKeys = (prevContainers.keys toSet) -- currentContainers.keys toSet
+    val currentContainers = createContainerSetMeshes(new Vector3(0,0,0),clusterState.containers)
 
-    removedContainerKeys map {prevContainers(_)} foreach scene.remove
+    clusterState.removedContainers foreach { rc =>
+
+    }
+
+    //removedContainerKeys map {prevContainers(_)} foreach scene.remove
     /* Actors.get ++ */ currentContainers map {_._2} foreach scene.add
     prevContainers = currentContainers
   }
