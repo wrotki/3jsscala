@@ -20,8 +20,8 @@ class ExampleScene(val container: HTMLElement, val width: Double, val height: Do
   camera.position.x = -250
   camera.position.y = 250
   camera.position.z = -1400
-//  override val controls: CameraControls = new ExampleControls(
-//    camera, this.container, scene, width, height, new Vector3(0,0,0))
+  //  override val controls: CameraControls = new ExampleControls(
+  //    camera, this.container, scene, width, height, new Vector3(0,0,0))
 
   setupRenderer
 
@@ -37,19 +37,14 @@ class ExampleScene(val container: HTMLElement, val width: Double, val height: Do
 
   val constantMeshes = Actors.get
   var meshes = constantMeshes
-  meshes foreach(scene.add)
+  meshes foreach (scene.add)
 
   val datasource = new WebSocket(getWebsocketUri(org.scalajs.dom.document, "status"))
 
-  var clusterState = Cluster(Seq(),Seq(),Seq())
-
-//  var prevContainers = Map[String,Object3D]()
-//  var newContainers = Map[String,Object3D]()
-//  var garbageContainers = Map[String,Object3D]()
-  var containersInScene = Map[String,Object3D]()
+  var clusterState = Cluster(Seq(), Seq(), Seq())
+  var containersInScene = Map[String, Object3D]()
 
   datasource.onmessage = (event: MessageEvent) => handleContainersUpdate(event)
-
 
   private def handleContainersUpdate(event: MessageEvent): Unit = {
     dom.console.log(event.data.toString)
@@ -57,33 +52,36 @@ class ExampleScene(val container: HTMLElement, val width: Double, val height: Do
     clusterState = Cluster(event.data.toString)
     clusterState.priorClusterState = priorClusterState
 
-    val labelsZipped = clusterState.containers.zipWithIndex
+    clusterState.removedContainers map {
+      containersInScene(_)
+    } foreach scene.remove
+    containersInScene = containersInScene -- clusterState.removedContainers
 
-    val currentContainers = createContainerSetMeshes(new Vector3(0,0,0),clusterState.containers)
+    val newContainersMeshes = createContainerSetMeshes(new Vector3(0, 0, 0), clusterState.newContainers)
+    newContainersMeshes.values foreach scene.add
+    containersInScene = containersInScene ++ newContainersMeshes
 
-    clusterState.removedContainers foreach { rc =>
-
-    }
-
-    //removedContainerKeys map {prevContainers(_)} foreach scene.remove
-    /* Actors.get ++ */ currentContainers map {_._2} foreach scene.add
-    prevContainers = currentContainers
+    positionMeshes
   }
 
-  def createContainerSetMeshes(curveStart: Vector3, containers: Seq[DockerContainerData]): Map[String,Object3D] = {
+  private def positionMeshes: Unit = {
+
+  }
+
+  def createContainerSetMeshes(curveStart: Vector3, containers: Set[String]): Map[String, Object3D] = {
     containers.zipWithIndex map { t =>
-        val box = SignedBox(t._1.name)
-        box.position.set(5500, 1400, -20000)
-        val p = ContainerMeshLocation(new Vector3(),t._2)
-        val pl = js.Dynamic.literal(x = p.x, y = p.y, z = p.z)
-        Tween.get(box.position).wait(t._2 * 150, false).to(pl, 3000, Ease.getPowInOut(4)).onChange = () => {
-          box.position.set(box.position.x, box.position.y, box.position.z)
-        }
-        (t._1.name,box)
-      } toMap
+      val box = SignedBox(t._1)
+      box.position.set(5500, 1400, -20000)
+      val p = ContainerMeshLocation(new Vector3(), t._2)
+      val pl = js.Dynamic.literal(x = p.x, y = p.y, z = p.z)
+      Tween.get(box.position).wait(t._2 * 150, false).to(pl, 3000, Ease.getPowInOut(4)).onChange = () => {
+        box.position.set(box.position.x, box.position.y, box.position.z)
+      }
+      (t._1, box)
+    } toMap
   }
 
-  def ContainerMeshLocation(curveStart: Vector3, i: Int):Vector3 = {
+  def ContainerMeshLocation(curveStart: Vector3, i: Int): Vector3 = {
     curveStart.add(LayoutCurve.grid(i))
   }
 
@@ -94,16 +92,16 @@ class ExampleScene(val container: HTMLElement, val width: Double, val height: Do
     s"$wsProtocol://127.0.0.1:8180/$socketId"
   }
 
-  private def setupRenderer:Unit ={
-    renderer.setClearColor(new Color(0x000040),0.5)
+  private def setupRenderer: Unit = {
+    renderer.setClearColor(new Color(0x000040), 0.5)
     window.addEventListener("resize",
       (e0: Event) => {
         val MARGIN = 0
         val WIDTH = window.innerWidth
         val HEIGHT = window.innerHeight - 2 * MARGIN
-        renderer.setSize( WIDTH, HEIGHT )
+        renderer.setSize(WIDTH, HEIGHT)
       }
-      ,false
+      , false
     )
   }
 }
@@ -113,14 +111,15 @@ class ExampleScene(val container: HTMLElement, val width: Double, val height: Do
 /**
   * Just shows that some effects are working
   *
-  * @param cam the camera control
-  * @param el the html element
-  * @param sc scene
+  * @param cam    the camera control
+  * @param el     the html element
+  * @param sc     scene
   * @param center center of screen
   */
 class ExampleControls(cam: Camera, el: HTMLElement, sc: Scene, width: Double, height: Double,
                       center: Vector3 = new Vector3()
                      ) extends JumpCameraControls(cam, el, sc, width, height, center) {
+
   import org.querki.jquery._
 
   lazy val $el = $(el)
@@ -218,10 +217,11 @@ trait ExampleData {
       |}
     """.stripMargin
 
-  lazy val htmlCode = """<section class="ui blue pilled message">
-                        |    ScalaJS interface for THREE.js javascript lib. You can rotate the cube and sprite by holding left mouse button
-                        |</section>
-                        |<section id="container">
-                        |""".stripMargin
+  lazy val htmlCode =
+    """<section class="ui blue pilled message">
+      |    ScalaJS interface for THREE.js javascript lib. You can rotate the cube and sprite by holding left mouse button
+      |</section>
+      |<section id="container">
+      | """.stripMargin
 
 }
