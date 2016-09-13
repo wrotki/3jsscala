@@ -47,16 +47,22 @@ class ExampleScene(val container: HTMLElement, val width: Double, val height: Do
   datasource.onmessage = (event: MessageEvent) => handleContainersUpdate(event)
 
   private def handleContainersUpdate(event: MessageEvent): Unit = {
+
     dom.console.log(event.data.toString)
+
     val priorClusterState = clusterState
+    // TODO: Is State monad applicable here?
+    priorClusterState.priorClusterState = Cluster.emptyClusterState // Drop old history preventing heap exhaustion
     clusterState = Cluster(event.data.toString)
     clusterState.priorClusterState = priorClusterState
 
+    // Clear old ones from the scene
     clusterState.removedContainers map {
       containersInScene(_)
     } foreach scene.remove
     containersInScene = containersInScene -- clusterState.removedContainers
 
+    // Introduce new ones
     val newContainersMeshes = createContainerSetMeshes(new Vector3(0, 0, 0), clusterState.newContainers)
     newContainersMeshes.values foreach scene.add
     containersInScene = containersInScene ++ newContainersMeshes

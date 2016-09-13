@@ -13,6 +13,12 @@ case class Cluster(containers: Seq[DockerContainerData],servers: Seq[String], ho
 
   def removedContainers: Set[String] = (priorClusterState.containers.map { _.name } toSet) -- (containers map { _.name })
 
+  def systemContainers: Set[String] = containers filter { _.name startsWith "polyverse" } map { _.name } toSet
+
+  def warmingUpContainers: Set[String] = containers filter { holdingTank contains _.id } map { _.name } toSet
+
+  def servingContainers: Set[String] = containers filter { servers contains _.name } map { _.name } toSet
+
 }
 
 object Cluster{
