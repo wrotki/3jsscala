@@ -19,6 +19,8 @@ case class Cluster(containers: Seq[DockerContainerData],servers: Seq[String], ho
 
   def servingContainers: Set[String] = containers filter { servers contains _.name } map { _.name } toSet
 
+  def garbageContainers: Set[String] = (containers.map { _.name } toSet) -- warmingUpContainers -- servingContainers
+
 }
 
 object Cluster{

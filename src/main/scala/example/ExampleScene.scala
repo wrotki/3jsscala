@@ -70,8 +70,27 @@ class ExampleScene(val container: HTMLElement, val width: Double, val height: Do
     positionMeshes
   }
 
-  private def positionMeshes: Unit = {
 
+
+  private def positionMeshSet(containerSet: () => Set[String], layoutStart: Vector3): Unit = {
+    val warmingUp = containerSet() map {
+      containersInScene(_)
+    } zipWithIndex
+    val r = warmingUp foreach { c =>
+      val pos = ContainerMeshLocation(layoutStart, c._2)
+      val pl = js.Dynamic.literal(x = pos.x, y = pos.y, z = pos.z)
+      val box = c._1
+      Tween.get(box.position).wait(c._2 * 150, false).to(pl, 3000, Ease.getPowInOut(4)).onChange = () => {
+        box.position.set(box.position.x, box.position.y, box.position.z)
+      }
+    }
+  }
+
+  private def positionMeshes: Unit = {
+    positionMeshSet(clusterState.systemContainers _, new Vector3(0,200,200))
+    positionMeshSet(clusterState.warmingUpContainers _, new Vector3(-200,10,200))
+    positionMeshSet(clusterState.servingContainers _, new Vector3(0,10,200))
+    positionMeshSet(clusterState.garbageContainers _, new Vector3(200,10,200))
   }
 
   def createContainerSetMeshes(curveStart: Vector3, containers: Set[String]): Map[String, Object3D] = {
