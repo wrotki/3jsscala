@@ -7,7 +7,7 @@ import org.scalajs.dom.html._
 
 object LabelTexture {
 
-  def apply(text: String): Texture = {
+  def apply(text: String, color: String): Texture = {
     val (w,h) = (512,128)
     val canvas = dom.document.createElement( "canvas" ).asInstanceOf[Canvas]
     canvas.width = w
@@ -19,10 +19,11 @@ object LabelTexture {
     val metrics = xc.measureText( text )
     val borderThickness = 2
     val textWidth = metrics.width
-    xc.fillStyle = "rgba(255,255,155,0.3)"
+    xc.fillStyle = "rgba(100,100,255,0.3)"
     xc.beginPath()
     xc.rect(0,0,w,h)
-    xc.fillStyle="PaleGoldenRod"
+    //xc.fillStyle="PaleGoldenRod"
+    xc.fillStyle=color
     xc.fill()
     xc.strokeStyle = "#000"
     xc.lineWidth = borderThickness

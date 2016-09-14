@@ -17,6 +17,7 @@ object PolyverseLogo {
     val logoGeometry = new PlaneGeometry(300, 50, 1, 1)
     val logo = new Mesh(logoGeometry, logoMaterial)
     logo.position.set(0,200,500)
+    logo.rotateY(Math.PI)
     logo
   }
 

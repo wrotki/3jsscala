@@ -26,7 +26,7 @@ object PushService extends WebService with CompactJsonFormatSupport {
     val containersSource = Source.actorPublisher[Strict](ContainerPublisher.props)
     val dataPublisherRef = system.actorOf(ContainerPublisher.props)
 
-    val o = Observable.interval(10 seconds)
+    val o = Observable.interval(2 seconds)
       .onErrorReturn(e => 0L)
       .subscribe((n) => {
         val svrs = servers.split("\n").toSeq map { line: String =>

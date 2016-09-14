@@ -8,7 +8,7 @@ import scala.scalajs.js
 object SignedBox {
 
   def apply(text: String): Object3D = {
-    val textTexture = LabelTexture(text)
+    val textTexture = LabelTexture(text,"PaleGoldenRod")
 
     // DoubleSide: render texture on both sides of mesh
     def materialParams: MeshBasicMaterialParameters = js.Dynamic.literal(

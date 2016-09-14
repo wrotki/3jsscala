@@ -12,7 +12,7 @@ object Label {
 
   def createLabel(text: String,position: Vector3): Object3D = {
     val spriteMaterialParams: SpriteMaterialParameters = js.Dynamic.literal(
-      map = LabelTexture(text)
+      map = LabelTexture(text,"Aqua")
     ).asInstanceOf[SpriteMaterialParameters]
     val spriteMaterial = new SpriteMaterial(spriteMaterialParams)
     val label = new Sprite( spriteMaterial )

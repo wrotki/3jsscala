@@ -16,6 +16,7 @@ import scala.scalajs.js
 // scalastyle:off
 class ExampleScene(val container: HTMLElement, val width: Double, val height: Double) extends Container3D {
 
+  private val tweenLength = 750
 
   camera.position.x = -250
   camera.position.y = 250
@@ -48,7 +49,7 @@ class ExampleScene(val container: HTMLElement, val width: Double, val height: Do
 
   private def handleContainersUpdate(event: MessageEvent): Unit = {
 
-    dom.console.log(event.data.toString)
+    //dom.console.log(event.data.toString)
 
     val priorClusterState = clusterState
     // TODO: Is State monad applicable here?
@@ -70,27 +71,46 @@ class ExampleScene(val container: HTMLElement, val width: Double, val height: Do
     positionMeshes
   }
 
+  private def positionMeshes: Unit = {
+    positionMeshSet(clusterState.systemContainers _, new Vector3(0, 100, 0))
+    positionMeshSet(clusterState.warmingUpContainers _, new Vector3(-200, 10, 100))
+    positionMeshSet(clusterState.servingContainers _, new Vector3(0, 10, 100))
+    positionMeshSet(clusterState.garbageContainers _, new Vector3(200, 10, 100))
+    dom.console.log("===================================================================================================================================================================")
+  }
 
+  private def logVector(label: String, v: Vector3): Unit = {
+    dom.console.log(label + v.x + "," + v.y + "," + v.z)
+  }
+
+  private def logDynamicVector(label: String, v: js.Dynamic): Unit = {
+    dom.console.log(label + v.x + "," + v.y + "," + v.z)
+  }
 
   private def positionMeshSet(containerSet: () => Set[String], layoutStart: Vector3): Unit = {
-    val warmingUp = containerSet() map {
+    logVector("positionMeshSet::layoutStart: ", layoutStart)
+    val containersToPosition = containerSet() map {
       containersInScene(_)
     } zipWithIndex
-    val r = warmingUp foreach { c =>
+    val r = containersToPosition foreach { c =>
       val pos = ContainerMeshLocation(layoutStart, c._2)
       val pl = js.Dynamic.literal(x = pos.x, y = pos.y, z = pos.z)
       val box = c._1
-      Tween.get(box.position).wait(c._2 * 150, false).to(pl, 3000, Ease.getPowInOut(4)).onChange = () => {
+      logVector("Tween from: ", box.position)
+      logDynamicVector("Tween to: ", pl)
+      Tween.get(box.position).wait(c._2 * 150, false).to(pl, tweenLength, Ease.getPowInOut(4)).onChange = () => {
         box.position.set(box.position.x, box.position.y, box.position.z)
       }
     }
   }
 
-  private def positionMeshes: Unit = {
-    positionMeshSet(clusterState.systemContainers _, new Vector3(0,200,200))
-    positionMeshSet(clusterState.warmingUpContainers _, new Vector3(-200,10,200))
-    positionMeshSet(clusterState.servingContainers _, new Vector3(0,10,200))
-    positionMeshSet(clusterState.garbageContainers _, new Vector3(200,10,200))
+  def ContainerMeshLocation(layoutStart: Vector3, i: Int): Vector3 = {
+    logVector("layoutStart: ", layoutStart)
+    val crv = LayoutCurve.grid(i)
+    logVector("LayoutCurve: ", crv)
+    val res = layoutStart.clone().add(crv) // Avoid modifying layoutStart
+    logVector("ContainerMeshLocation: ", res)
+    res
   }
 
   def createContainerSetMeshes(curveStart: Vector3, containers: Set[String]): Map[String, Object3D] = {
@@ -98,18 +118,13 @@ class ExampleScene(val container: HTMLElement, val width: Double, val height: Do
       val box = SignedBox(t._1)
       box.position.set(5500, 1400, -20000)
       val p = ContainerMeshLocation(new Vector3(), t._2)
-      val pl = js.Dynamic.literal(x = p.x, y = p.y, z = p.z)
-      Tween.get(box.position).wait(t._2 * 150, false).to(pl, 3000, Ease.getPowInOut(4)).onChange = () => {
-        box.position.set(box.position.x, box.position.y, box.position.z)
-      }
+      //      val pl = js.Dynamic.literal(x = p.x, y = p.y, z = p.z)
+      //      Tween.get(box.position).wait(t._2 * 150, false).to(pl, tweenLength, Ease.getPowInOut(4)).onChange = () => {
+      //        box.position.set(box.position.x, box.position.y, box.position.z)
+      //      }
       (t._1, box)
     } toMap
   }
-
-  def ContainerMeshLocation(curveStart: Vector3, i: Int): Vector3 = {
-    curveStart.add(LayoutCurve.grid(i))
-  }
-
 
   private def getWebsocketUri(document: Document, socketId: String): String = {
     val wsProtocol = if (org.scalajs.dom.document.location.protocol == "https:") "wss" else "ws"

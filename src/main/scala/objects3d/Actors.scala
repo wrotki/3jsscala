@@ -24,6 +24,7 @@ object Actors {
       mesh.position.set(v.x, v.y, v.z)
       mesh
     }
-    Seq[Object3D]() :+ SkyBox() :+ Floor() :+ PolyverseLogo() :+ RegionBox("Active") :+ FirewallBox("WAF")
+    Seq[Object3D]() :+ SkyBox() :+ Floor() :+ PolyverseLogo() :+ RegionBox("Active") :+ FirewallBox("WAF") :+
+      Text(text="Warm up",position=new Vector3(-350,150,450)) :+ Text(text="Serve",position=new Vector3(0,150,450)) :+ Text(text="Purge/collect",position=new Vector3(350,150,450))
   }
 }
