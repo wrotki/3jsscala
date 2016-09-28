@@ -29,24 +29,38 @@ object PushService extends WebService with CompactJsonFormatSupport {
     val o = Observable.interval(2 seconds)
       .onErrorReturn(e => 0L)
       .subscribe((n) => {
-        val svrs = servers.split("\n").toSeq map { line: String =>
-          val depickled = read[Map[String, String]](line)
-          depickled("ContainerName")
-        }
+        val svrs = for {
+          scoll <- servers
+          sseq <- Try(scoll.split("\n").toSeq)
+          depickled <- Try(
+            sseq map { s =>
+              val smap = read[Map[String, String]](s)
+              smap("ContainerName")
+            }
+          )
+        } yield depickled
         println("Servers:" + svrs)
-        val hTank = holdingTank.split("\n").toSeq map { line: String =>
-          val segs = line.split("/")
-          if (segs.length>3) segs(3) else ""
-        } filter { s => !s.isEmpty }
+
+        val hTank = for {
+          htcoll <- holdingTank
+          htseq <- Try(htcoll.split("\n").toSeq)
+          names <- Try(
+            htseq map { ht =>
+              val segs = ht.split("/")
+              if (segs.length > 3) segs(3) else ""
+            } filter { s => !s.isEmpty }
+          )
+        } yield names
         println("Holding tank:" + hTank)
+
         val containers: Seq[DockerContainerData] = DockerService.docker.listContainers().asScala map { c => DockerContainerData(id = c.id(), name = (c.names().asScala mkString).substring(1)) }
 
-        dataPublisherRef ! DockerState(containers = containers, servers = svrs, holdingTank = hTank)
+        dataPublisherRef ! DockerState(containers = containers,
+          servers = svrs.getOrElse(Seq()),
+          holdingTank = hTank.getOrElse((Seq())))
         //println("sent")
       },
         e => println(e))
-
-
 
     extractUpgradeToWebSocket { upgrade =>
       complete(upgrade.handleMessagesWithSinkSource(Sink.ignore, Source.fromPublisher(ActorPublisher(dataPublisherRef))))
@@ -54,18 +68,11 @@ object PushService extends WebService with CompactJsonFormatSupport {
 
   }
 
-  def servers: String = {
-    val cmd = Try("docker exec polyverse_etcd_1 /etcdctl ls --recursive / " #|
-      "grep servers/" #|
-      "xargs -L 1 docker exec polyverse_etcd_1 /etcdctl get" !!)
-    if (cmd.isSuccess) cmd.get
-    else ""
-  }
+  def servers: Try[String] = Try("docker exec polyverse_etcd_1 /etcdctl ls --recursive / " #|
+    "grep servers/" #|
+    "xargs -L 1 docker exec polyverse_etcd_1 /etcdctl get" !!)
 
-  def holdingTank: String = {
-    val cmd = Try("docker exec polyverse_etcd_1 /etcdctl ls --recursive / " #|
-      "grep holdingtank/" !!)
-    if (cmd.isSuccess) cmd.get
-    else ""
-  }
+  def holdingTank: Try[String] = Try("docker exec polyverse_etcd_1 /etcdctl ls --recursive / " #|
+    "grep holdingtank/" !!)
+
 }
