@@ -72,9 +72,9 @@ class ExampleScene(val container: HTMLElement, val width: Double, val height: Do
 
   private def positionMeshes: Unit = {
     positionMeshSet(clusterState.systemContainers _, new Vector3(0, 100, 0))
-    positionMeshSet(clusterState.warmingUpContainers _, new Vector3(-200, 10, 100))
-    positionMeshSet(clusterState.servingContainers _, new Vector3(0, 10, 100))
-    positionMeshSet(clusterState.garbageContainers _, new Vector3(200, 10, 100))
+    positionMeshSet(clusterState.warmingUpContainers _, new Vector3(-200, 10, -100))
+    positionMeshSet(clusterState.servingContainers _, new Vector3(0, 10, -100))
+    positionMeshSet(clusterState.garbageContainers _, new Vector3(200, 10, -100))
     dom.console.log("===================================================================================================================================================================")
   }
 

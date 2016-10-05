@@ -17,14 +17,19 @@ object RequestParticles {
     val particles = new Geometry()
     def pointCloudParams: PointCloudMaterialParameters = js.Dynamic.literal(
       color = 0xFFFFFF,
-      size = 20
+      size = 20,
+      map = ImageUtils.loadTexture(
+        Resources.loadPath("/3d/particle.png")
+      ),
+      transparent = true,
+      blending = 2 //THREE.AdditiveBlending
     ).asInstanceOf[PointCloudMaterialParameters]
     val pMaterial = new PointCloudMaterial(pointCloudParams)
 
     (0 to particleCount) map { _ => new Vector3(
       Math.random() * 500 - 250,
       Math.random() * 500 - 250,
-      Math.random() * 500 + 2500
+      Math.random() * 500 + 1500
     )
     } foreach {
       particles.vertices.push(_)
@@ -35,16 +40,14 @@ object RequestParticles {
       particles,
       pMaterial)
 
-
-    val dist = new Vector3(50000, 50000, 50000)
     val pindexed = particles.vertices.zipWithIndex
-    val pl = js.Dynamic.literal(x = 0, y = 0, z = 0)
     val tweenProps = js.Dynamic.literal(
       loop = true
     )
     pindexed foreach { v =>
       val tweenLength = 7500
-      Tween.get(particles.vertices(v._2),tweenProps).wait(v._2 * 15, false).to(pl, tweenLength, Ease.getPowInOut(4))
+      val pl = js.Dynamic.literal(x = Math.random() * 200 - 100, y = 50, z = 0)
+      Tween.get(particles.vertices(v._2), tweenProps).wait(v._2 * 15, false).to(pl, tweenLength, Ease.getPowInOut(4))
     }
 
     setInterval(100) {
