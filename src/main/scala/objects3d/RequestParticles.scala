@@ -46,7 +46,7 @@ object RequestParticles {
     )
     pindexed foreach { v =>
       val tweenLength = 7500
-      val pl = js.Dynamic.literal(x = Math.random() * 200 - 100, y = 50, z = 0)
+      val pl = js.Dynamic.literal(x = Math.random() * 200 - 100, y = 25, z = Math.random() * 200 - 100)
       Tween.get(particles.vertices(v._2), tweenProps).wait(v._2 * 15, false).to(pl, tweenLength, Ease.getPowInOut(4))
     }
 
