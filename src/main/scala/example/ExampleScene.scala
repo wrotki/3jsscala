@@ -18,6 +18,7 @@ class ExampleScene(val container: HTMLElement, val width: Double, val height: Do
 
   private val tweenLength = 750
 
+
   camera.position.x = -250
   camera.position.y = 250
   camera.position.z = -1400
@@ -48,8 +49,6 @@ class ExampleScene(val container: HTMLElement, val width: Double, val height: Do
   datasource.onmessage = (event: MessageEvent) => handleContainersUpdate(event)
 
   private def handleContainersUpdate(event: MessageEvent): Unit = {
-
-    //dom.console.log(event.data.toString)
 
     val priorClusterState = clusterState
     // TODO: Is State monad applicable here?
@@ -88,7 +87,6 @@ class ExampleScene(val container: HTMLElement, val width: Double, val height: Do
   }
 
   private def positionMeshSet(containerSet: () => Set[String], layoutStart: Vector3): Unit = {
-    logVector("positionMeshSet::layoutStart: ", layoutStart)
     val containersToPosition = containerSet() map {
       containersInScene(_)
     } zipWithIndex
@@ -96,20 +94,13 @@ class ExampleScene(val container: HTMLElement, val width: Double, val height: Do
       val pos = ContainerMeshLocation(layoutStart, c._2)
       val pl = js.Dynamic.literal(x = pos.x, y = pos.y, z = pos.z)
       val box = c._1
-      logVector("Tween from: ", box.position)
-      logDynamicVector("Tween to: ", pl)
-      Tween.get(box.position).wait(c._2 * 150, false).to(pl, tweenLength, Ease.getPowInOut(4)).onChange = () => {
-        box.position.set(box.position.x, box.position.y, box.position.z)
-      }
+      Tween.get(box.position).wait(c._2 * 150, false).to(pl, tweenLength, Ease.getPowInOut(4))
     }
   }
 
   def ContainerMeshLocation(layoutStart: Vector3, i: Int): Vector3 = {
-    logVector("layoutStart: ", layoutStart)
     val crv = LayoutCurve.grid(i)
-    logVector("LayoutCurve: ", crv)
     val res = layoutStart.clone().add(crv) // Avoid modifying layoutStart
-    logVector("ContainerMeshLocation: ", res)
     res
   }
 
@@ -118,10 +109,6 @@ class ExampleScene(val container: HTMLElement, val width: Double, val height: Do
       val box = SignedBox(t._1)
       box.position.set(5500, 1400, -20000)
       val p = ContainerMeshLocation(new Vector3(), t._2)
-      //      val pl = js.Dynamic.literal(x = p.x, y = p.y, z = p.z)
-      //      Tween.get(box.position).wait(t._2 * 150, false).to(pl, tweenLength, Ease.getPowInOut(4)).onChange = () => {
-      //        box.position.set(box.position.x, box.position.y, box.position.z)
-      //      }
       (t._1, box)
     } toMap
   }
