@@ -43,7 +43,7 @@ class ExampleScene(val container: HTMLElement, val width: Double, val height: Do
 
   val datasource = new WebSocket(getWebsocketUri(org.scalajs.dom.document, "status"))
 
-  var clusterState = Cluster(Seq(), Seq(), Seq())
+  var clusterState = Cluster(Seq(), Seq(), Seq(), Seq())
   var containersInScene = Map[String, Object3D]()
 
   datasource.onmessage = (event: MessageEvent) => handleContainersUpdate(event)
@@ -71,10 +71,10 @@ class ExampleScene(val container: HTMLElement, val width: Double, val height: Do
   }
 
   private def positionMeshes: Unit = {
-    positionMeshSet(clusterState.systemContainers _, new Vector3(0, 100, 0))
-    positionMeshSet(clusterState.warmingUpContainers _, new Vector3(-200, 10, -100))
-    positionMeshSet(clusterState.servingContainers _, new Vector3(0, 10, -100))
-    positionMeshSet(clusterState.garbageContainers _, new Vector3(200, 10, -100))
+    positionMeshSet(clusterState.systemContainers _, new Vector3(0, 150, 0))
+    positionMeshSet(clusterState.warmingUpContainers _, new Vector3(-200, 50, -100))
+    positionMeshSet(clusterState.servingContainers _, new Vector3(0, -10, 50))
+    positionMeshSet(clusterState.garbageContainers _, new Vector3(200, 50, -100))
     dom.console.log("===================================================================================================================================================================")
   }
 
