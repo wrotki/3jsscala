@@ -1,0 +1,6 @@
+#!/bin/bash
+echo "Fixing /etc/hosts..."
+fix-etc-hosts
+echo "Starting up sbt..."
+sbt fastOptJS "project datasource" run
+

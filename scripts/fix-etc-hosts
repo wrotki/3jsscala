@@ -1,0 +1,10 @@
+#!/bin/bash
+
+ed /etc/hosts << MYEOF
+,s/localhost/&-real/
+$
+s/^[0-9.]*/& localhost/
+,wq
+MYEOF
+
+
